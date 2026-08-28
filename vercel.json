@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/config", "destination": "/api/config.js" },
+    { "source": "/api/create-order", "destination": "/api/create-order.js" },
+    { "source": "/api/verify-payment", "destination": "/api/verify-payment.js" }
+  ]
+}

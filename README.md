@@ -119,14 +119,19 @@ git clone https://github.com/akhileshwar994/AKIVA-HEALTH-INDIA-FAT-TO-FIT-PROGRA
 # Navigate to project
 cd AKIVA-HEALTH-INDIA-FAT-TO-FIT-PROGRAM
 
-# Serve locally (any static server works)
-npx serve .
+# Install (Razorpay backend only — the frontend still needs no build step)
+npm install
 
-# Or simply open index.html in your browser
-open index.html
+# Add your Razorpay keys
+cp .env.example .env
+
+# Run the site + payment API
+npm start        # → http://localhost:3000
 ```
 
-No build tools, no dependencies, no frameworks. Just HTML + CSS + JS.
+The frontend is still plain HTML + CSS + JS with no build step. The only
+dependency is the small Node backend Razorpay requires for order creation and
+signature verification — see [PAYMENTS.md](PAYMENTS.md).
 
 ## Tech Stack
 
@@ -184,11 +189,22 @@ See [CLINICAL_SOURCES.md](CLINICAL_SOURCES.md) for complete citation list with D
 
 ### Razorpay Payment Gateway
 
-Replace the test key in `app.js`:
-```javascript
-// Find this line and replace with your actual Razorpay key_id
-key: "rzp_test_DEMO"  // → Replace with: "rzp_live_YOUR_KEY_HERE"
+Keys live in `.env` — never in source. Copy the template and fill it in:
+
+```bash
+cp .env.example .env
 ```
+
+```
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxxx
+RAZORPAY_KEY_SECRET=your_key_secret_here
+```
+
+Get both from [Razorpay Dashboard → API Keys](https://dashboard.razorpay.com/app/keys).
+Swap `rzp_test_*` for `rzp_live_*` when you go live. `RAZORPAY_KEY_SECRET` is used
+only server-side; the browser receives the public `key_id` only.
+
+Full setup, test cards, error handling and deployment notes: **[PAYMENTS.md](PAYMENTS.md)**
 
 ### Admin Dashboard
 

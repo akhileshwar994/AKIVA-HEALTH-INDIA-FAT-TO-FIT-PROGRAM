@@ -12,6 +12,10 @@ Thumbs.db
 node_modules/
 package-lock.json
 
-# Environment
+# Environment (never commit real keys — .env.example is the tracked template)
 .env
-.env.local
+.env.*
+!.env.example
+
+# Vercel
+.vercel/

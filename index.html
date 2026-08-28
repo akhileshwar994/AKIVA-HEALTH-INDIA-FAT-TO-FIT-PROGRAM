@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -672,8 +673,9 @@
           <p class="payment-note">Program & medication fees will be collected separately after doctor approval.</p>
           <div class="form-nav">
             <button type="button" class="btn btn--outline form-prev">← Back</button>
-            <button type="button" class="btn btn--primary btn--lg btn--block" id="payBtn"><i data-lucide="credit-card"></i> Pay ₹999 Securely</button>
+            <button type="button" class="btn btn--primary btn--lg btn--block" id="payBtn" data-amount="99900"><i data-lucide="credit-card"></i> Pay ₹999 Securely</button>
           </div>
+          <p class="payment-status" id="paymentStatus" role="status" aria-live="polite" hidden></p>
         </div>
 
         <!-- Thank You (hidden) -->

@@ -628,44 +628,183 @@
   updateCalc();
 
   // ===========================================
-  // PAYMENT (Razorpay Demo)
+  // PAYMENT (Razorpay Standard Web Checkout)
   // ===========================================
+  // Flow: POST /api/create-order  ->  Razorpay modal  ->  POST /api/verify-payment
+  // The key secret lives only on the server; the browser receives key_id only.
   const payBtn = document.getElementById('payBtn');
+  const paymentStatus = document.getElementById('paymentStatus');
+
+  const CONSULTATION_FEE_PAISE = payBtn ? parseInt(payBtn.dataset.amount, 10) || 99900 : 99900;
+
+  // Same-origin by default. Set window.API_BASE in index.html only if the API
+  // is hosted separately from the static site (e.g. a Vercel/Netlify backend).
+  const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
+
+  function setPayStatus(message, type) {
+    if (!paymentStatus) return;
+    if (!message) {
+      paymentStatus.hidden = true;
+      paymentStatus.textContent = '';
+      paymentStatus.className = 'payment-status';
+      return;
+    }
+    paymentStatus.hidden = false;
+    paymentStatus.textContent = message;
+    paymentStatus.className = 'payment-status payment-status--' + (type || 'info');
+  }
+
+  function setPayLoading(isLoading, label) {
+    if (!payBtn) return;
+    payBtn.disabled = isLoading;
+    payBtn.classList.toggle('is-loading', isLoading);
+    if (isLoading) {
+      payBtn.dataset.originalHtml = payBtn.dataset.originalHtml || payBtn.innerHTML;
+      payBtn.textContent = label || 'Processing…';
+    } else if (payBtn.dataset.originalHtml) {
+      payBtn.innerHTML = payBtn.dataset.originalHtml;
+      initLucide();
+    }
+  }
+
+  async function postJson(path, payload) {
+    const res = await fetch(API_BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+    let body = {};
+    try { body = await res.json(); } catch (_) { /* non-JSON response */ }
+    if (!res.ok || body.success === false) {
+      throw new Error(body.error || 'Request failed (HTTP ' + res.status + ').');
+    }
+    return body;
+  }
+
+  function collectPatient(data) {
+    const weight = parseFloat(data.weight) || 0;
+    const height = (parseFloat(data.height) || 170) / 100;
+    const bmi = height > 0 ? (weight / (height * height)).toFixed(1) : 'N/A';
+    return {
+      name: data.name || 'Anonymous',
+      email: data.email || 'N/A',
+      phone: data.phone || 'N/A',
+      bmi: bmi,
+      program: data.program || 'N/A',
+      status: 'Pending',
+      date: new Date().toLocaleString('en-IN'),
+    };
+  }
+
   if (payBtn) {
-    payBtn.addEventListener('click', (e) => {
+    payBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      // Collect form data
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      // Validate consents
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      // Validate consents before charging anything
       const consents = form.querySelectorAll('[data-form-step="5"] input[type="checkbox"][required]');
       let allConsented = true;
       consents.forEach(c => { if (!c.checked) allConsented = false; });
-
       if (!allConsented) {
-        alert('Please agree to all consent checkboxes before proceeding.');
+        setPayStatus('Please agree to all consent checkboxes before proceeding.', 'error');
         return;
       }
 
-      // Demo: Save to in-memory store
-      const submissions = window.__patientSubmissions || [];
-      const weight = parseFloat(data.weight) || 0;
-      const height = (parseFloat(data.height) || 170) / 100;
-      const bmi = height > 0 ? (weight / (height * height)).toFixed(1) : 'N/A';
+      if (typeof window.Razorpay !== 'function') {
+        setPayStatus('Payment library could not load. Check your internet connection and reload the page.', 'error');
+        return;
+      }
 
-      submissions.push({
-        name: data.name || 'Anonymous',
-        email: data.email || 'N/A',
-        phone: data.phone || 'N/A',
-        bmi: bmi,
-        program: data.program || 'N/A',
-        status: 'Pending',
-        date: new Date().toLocaleString('en-IN'),
-      });
-      window.__patientSubmissions = submissions;
+      setPayStatus('');
+      setPayLoading(true, 'Creating secure order…');
 
-      // Show success step
-      showStep(7);
+      try {
+        // ---- STEP 1: create the order on the server ----
+        const order = await postJson('/api/create-order', {
+          amount: CONSULTATION_FEE_PAISE,
+          currency: 'INR',
+          receipt: 'iftf_' + Date.now(),
+          notes: {
+            purpose: 'GLP-1 consultation fee',
+            program: data.program || 'not_selected',
+          },
+        });
+
+        setPayLoading(false);
+
+        // ---- STEP 2: open Razorpay Standard Checkout ----
+        const rzp = new window.Razorpay({
+          key: order.key_id,
+          amount: order.amount,
+          currency: order.currency,
+          order_id: order.order_id,
+          name: 'India Fat to Fit',
+          description: 'GLP-1 Consultation & Personalized Plan',
+          prefill: {
+            name: data.name || '',
+            email: data.email || '',
+            contact: data.phone || '',
+          },
+          notes: { receipt: order.receipt },
+          theme: { color: '#0d9488' },
+
+          // ---- STEP 3: verify the signature server-side ----
+          handler: async function (response) {
+            setPayLoading(true, 'Verifying payment…');
+            try {
+              await postJson('/api/verify-payment', {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+
+              // Verified — now record the submission for doctor review
+              const submissions = window.__patientSubmissions || [];
+              submissions.push(Object.assign(collectPatient(data), {
+                payment_id: response.razorpay_payment_id,
+                order_id: response.razorpay_order_id,
+                paid: true,
+              }));
+              window.__patientSubmissions = submissions;
+
+              setPayLoading(false);
+              setPayStatus('');
+              showStep(7);
+            } catch (verifyError) {
+              setPayLoading(false);
+              setPayStatus(
+                'We could not verify your payment (' + verifyError.message +
+                '). Do not retry — contact support on WhatsApp with your payment ID ' +
+                response.razorpay_payment_id + '.',
+                'error'
+              );
+            }
+          },
+
+          modal: {
+            ondismiss: function () {
+              setPayLoading(false);
+              setPayStatus('Payment cancelled. Your assessment is saved — you can pay whenever you are ready.', 'warn');
+            },
+          },
+        });
+
+        rzp.on('payment.failed', function (response) {
+          setPayLoading(false);
+          const err = (response && response.error) || {};
+          setPayStatus(
+            'Payment failed: ' + (err.description || 'Unknown error') +
+            (err.reason ? ' (' + err.reason + ')' : '') + '. Please try another payment method.',
+            'error'
+          );
+        });
+
+        rzp.open();
+      } catch (orderError) {
+        setPayLoading(false);
+        setPayStatus('Could not start payment: ' + orderError.message, 'error');
+      }
     });
   }
 
