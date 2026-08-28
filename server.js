@@ -20,6 +20,8 @@ const express = require('express');
 const createOrderHandler = require('./api/create-order');
 const verifyPaymentHandler = require('./api/verify-payment');
 const configHandler = require('./api/config');
+const consultationBookingHandler = require('./api/consultation-booking');
+const statsHandler = require('./api/stats');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +34,8 @@ app.use(express.json({ limit: '100kb' }));
 app.all('/api/config', configHandler);
 app.all('/api/create-order', createOrderHandler);
 app.all('/api/verify-payment', verifyPaymentHandler);
+app.all('/api/consultation-booking', consultationBookingHandler);
+app.all('/api/stats', statsHandler);
 
 // --- Static site ---
 app.use(express.static(__dirname, { extensions: ['html'] }));

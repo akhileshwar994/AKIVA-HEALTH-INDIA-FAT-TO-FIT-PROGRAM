@@ -4,6 +4,8 @@
   "rewrites": [
     { "source": "/api/config", "destination": "/api/config.js" },
     { "source": "/api/create-order", "destination": "/api/create-order.js" },
-    { "source": "/api/verify-payment", "destination": "/api/verify-payment.js" }
+    { "source": "/api/verify-payment", "destination": "/api/verify-payment.js" },
+    { "source": "/api/consultation-booking", "destination": "/api/consultation-booking.js" },
+    { "source": "/api/stats", "destination": "/api/stats.js" }
   ]
 }

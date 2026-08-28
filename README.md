@@ -84,6 +84,7 @@ Every chart links directly to its PubMed/PMC source:
 ### 🏥 Complete Telehealth Platform
 - **6-Step Health Assessment** — Clinically validated questionnaire with auto BMI calculator (Indian classification)
 - **Razorpay Integration** — ₹999 consultation fee, UPI/Cards/NetBanking
+- **₹999 Doctor Consultation funnel** — Announcement bar, timed/exit-intent offer popup, dedicated nav button and mobile action bar, all opening a 3-stage modal: pay → submit contact details (with a required **alternate number**) → land in the doctor's WhatsApp with the booking already confirmed
 - **Doctor Review Dashboard** — Digital signature and approval workflow
 - **4-Tier Pricing** — Kickstart (1mo) → Total Reset (12mo) with progressive drug discounts
 - **Indian Diet Plans** — Region-specific (North, South, Bengali, Gujarati) per ICMR-NIN 2024 guidelines
@@ -148,9 +149,18 @@ signature verification — see [PAYMENTS.md](PAYMENTS.md).
 ## Project Structure
 
 ```
-├── index.html          # Single-page application (1,128 lines)
-├── style.css           # Complete design system with dark mode (1,911 lines)
-├── app.js              # Interactive features, charts, forms (868 lines)
+├── index.html          # Single-page application
+├── style.css           # Complete design system with dark mode
+├── app.js              # Interactive features, charts, assessment form
+├── consult.js          # ₹999 consultation funnel (popup, nav CTA, 3-stage modal)
+├── lib/
+│   ├── razorpay.js     # Orders, HMAC signature verification, CORS/JSON helpers
+│   └── bookings.js     # Booking records, WhatsApp link builder, stats
+├── api/                # create-order, verify-payment, config,
+│                       #   consultation-booking, stats
+├── server.js           # Express server for local dev / self-hosting
+├── vercel.json         # Serverless routing
+├── PAYMENTS.md         # Payment + consultation funnel setup and testing
 ├── screenshots/        # Documentation screenshots
 │   ├── hero.png
 │   ├── crisis.png
@@ -198,6 +208,10 @@ cp .env.example .env
 ```
 RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxxx
 RAZORPAY_KEY_SECRET=your_key_secret_here
+PORT=3000
+ALLOWED_ORIGIN=https://indiafattofit.com   # CORS origin for the API
+DOCTOR_WHATSAPP=917801009912               # receives the booking handoff
+BOOKINGS_FILE=data/bookings.jsonl          # optional; local booking log
 ```
 
 Get both from [Razorpay Dashboard → API Keys](https://dashboard.razorpay.com/app/keys).
@@ -205,6 +219,18 @@ Swap `rzp_test_*` for `rzp_live_*` when you go live. `RAZORPAY_KEY_SECRET` is us
 only server-side; the browser receives the public `key_id` only.
 
 Full setup, test cards, error handling and deployment notes: **[PAYMENTS.md](PAYMENTS.md)**
+
+### Consultation bookings
+
+After a verified ₹999 payment, `POST /api/consultation-booking` re-verifies the Razorpay
+signature server-side, issues a booking ID (`IFTF-XXXXXX`) and returns a `wa.me` link
+pre-filled with the patient's details, so the patient lands in the doctor's WhatsApp with
+the booking already made. `GET /api/stats` returns anonymous booking counts for the
+social-proof strip, which stays hidden until there are at least 5 real bookings.
+
+Bookings append to `data/bookings.jsonl` (git-ignored). **This is ephemeral on serverless
+hosts** — wire up a database before relying on it. `/#consult` deep-links straight into
+the consultation modal, which is the URL to use in ads and WhatsApp broadcasts.
 
 ### Admin Dashboard
 

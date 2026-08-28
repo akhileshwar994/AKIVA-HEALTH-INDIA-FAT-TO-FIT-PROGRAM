@@ -33,6 +33,40 @@ Server recomputes HMAC-SHA256(order_id|payment_id, KEY_SECRET)
 `RAZORPAY_KEY_SECRET` never leaves the server. The browser only ever receives the
 public `key_id`, returned alongside each created order (and from `GET /api/config`).
 
+### The ₹999 consultation funnel
+
+`consult.js` drives a second, self-contained flow on top of the same two endpoints:
+
+```
+Stage 1  Offer      ₹2,999 struck → ₹999, consent checkbox, Pay button
+   │              POST /api/create-order → Razorpay Checkout → POST /api/verify-payment
+   ▼
+Stage 2  Details    Name, WhatsApp number, ALTERNATE number (must differ), email,
+   │              age, sex, city, language, preferred slot, concern, referral code
+   │              POST /api/consultation-booking  ← re-verifies the signature server-side
+   ▼
+Stage 3  WhatsApp   Booking ID (IFTF-XXXXXX), "Open WhatsApp Chat" button that opens
+                  wa.me/<DOCTOR_WHATSAPP> pre-filled with the booking summary,
+                  plus a referral code the patient can copy or share
+```
+
+`/api/consultation-booking` calls `verifyPayment()` **before** it writes anything, so a
+forged or replayed payment id returns 400 and no booking is created. It then confirms
+the payment exists and is captured at Razorpay. Only then is the record written.
+
+Bookings append as JSON lines to `data/bookings.jsonl` (git-ignored; override the path
+with `BOOKINGS_FILE`). This is best-effort: **on Vercel and other serverless hosts the
+filesystem is read-only and ephemeral**, so the endpoint logs a warning, still returns
+the WhatsApp link, and sets `persisted: false`. Move this to a database (or a Razorpay
+`payment.captured` webhook writing to one) before you rely on it as the booking record.
+
+The social-proof strip fed by `GET /api/stats` stays hidden until there are at least 5
+real bookings — it never shows invented numbers.
+
+Deep link: `https://indiafattofit.com/#consult` opens the consultation modal directly,
+which is what the announcement bar, the nav button, the mobile bar and any ad campaign
+link should point at.
+
 ---
 
 ## Files
@@ -40,11 +74,15 @@ public `key_id`, returned alongside each created order (and from `GET /api/confi
 | File | Role |
 | --- | --- |
 | `lib/razorpay.js` | Order creation, signature verification, validation, CORS, JSON helpers |
+| `lib/bookings.js` | Consultation booking record, WhatsApp link builder, aggregate stats |
 | `api/create-order.js` | `POST /api/create-order` |
 | `api/verify-payment.js` | `POST /api/verify-payment` |
 | `api/config.js` | `GET /api/config` — returns the public `key_id` only |
+| `api/consultation-booking.js` | `POST /api/consultation-booking` — re-verifies the payment, stores the booking, returns the WhatsApp handoff link |
+| `api/stats.js` | `GET /api/stats` — anonymous booking counts for the social-proof strip |
+| `consult.js` | The ₹999 consultation funnel: announcement bar, offer popup, nav button, 3-stage modal, referral share |
 | `server.js` | Express dev/self-host server: mounts the API + serves the static site |
-| `vercel.json` | Routes the three functions on Vercel |
+| `vercel.json` | Routes the five functions on Vercel |
 | `.env` | Your real keys — **git-ignored, never commit** |
 | `.env.example` | Template to copy |
 
@@ -176,3 +214,9 @@ is restricted to your domain.
       two endpoints — pass the amount in paise; no new code is needed.
 - [ ] Keep the no-refund policy visible on the checkout step, as Razorpay requires a
       published refund policy.
+- [ ] Set `DOCTOR_WHATSAPP` to the number that should receive bookings (digits with
+      country code, no `+` — e.g. `917801009912`). It defaults to `917801009912`.
+- [ ] Replace `data/bookings.jsonl` with a database if you deploy serverless; see
+      "The ₹999 consultation funnel" above.
+- [ ] Honour the referral codes. `consult.js` issues them and accepts one on the form,
+      but nothing redeems them yet — the ₹500 discount is a manual step today.

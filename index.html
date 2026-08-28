@@ -38,6 +38,21 @@
 <body>
 
 <!-- NAVIGATION -->
+<!-- ANNOUNCEMENT BAR: discounted consultation offer -->
+<div class="announce" id="announceBar">
+  <div class="announce__inner">
+    <span class="announce__pulse" aria-hidden="true"></span>
+    <p class="announce__text">
+      <strong>Expert Doctor Consultation</strong>
+      <span class="announce__was">&#8377;2,999</span>
+      <span class="announce__now">&#8377;999</span>
+      <span class="announce__save">Save 67%</span>
+    </p>
+    <button type="button" class="announce__cta" data-open-consult="announcement">Book Now</button>
+    <button type="button" class="announce__close" id="announceClose" aria-label="Dismiss offer">&times;</button>
+  </div>
+</div>
+
 <header class="nav" id="nav">
   <div class="nav__inner">
     <a href="#home" class="nav__logo" aria-label="India Fat to Fit Home">
@@ -69,6 +84,11 @@
     <div class="nav__actions">
       <button data-theme-toggle aria-label="Switch to dark mode" class="nav__toggle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button type="button" class="btn btn--consult nav__consult" data-open-consult="nav">
+        <i data-lucide="stethoscope"></i>
+        <span class="nav__consult-label">Doctor Consultation</span>
+        <span class="nav__consult-price">&#8377;999</span>
       </button>
       <a href="#assessment" class="btn btn--primary nav__cta">Start Your Transformation</a>
       <button class="nav__hamburger" id="hamburger" aria-label="Toggle menu">
@@ -1091,6 +1111,274 @@
   <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
+<!-- ============================================================
+     MOBILE STICKY CTA BAR
+     ============================================================ -->
+<div class="mobile-bar" id="mobileBar">
+  <button type="button" class="mobile-bar__btn mobile-bar__btn--consult" data-open-consult="mobile-bar">
+    <i data-lucide="stethoscope"></i>
+    <span>Consult &#8377;999 <s>&#8377;2,999</s></span>
+  </button>
+  <a href="#assessment" class="mobile-bar__btn mobile-bar__btn--assess">
+    <i data-lucide="clipboard-list"></i>
+    <span>Assessment</span>
+  </a>
+</div>
+
+<!-- ============================================================
+     OFFER POP-UP BANNER
+     ============================================================ -->
+<div class="popup-overlay" id="offerPopup" role="dialog" aria-modal="true" aria-labelledby="offerPopupTitle" hidden>
+  <div class="popup">
+    <button type="button" class="popup__close" id="offerPopupClose" aria-label="Close offer">&times;</button>
+
+    <div class="popup__ribbon">Limited-Time Launch Offer</div>
+
+    <div class="popup__body">
+      <div class="popup__doctor">
+        <div class="popup__avatar" aria-hidden="true">AV</div>
+        <div>
+          <p class="popup__doctor-name">Dr. Akhileshwar Reddy Vangala</p>
+          <p class="popup__doctor-cred">MBBS, MD (Community and Family Medicine)</p>
+        </div>
+      </div>
+
+      <h2 class="popup__title" id="offerPopupTitle">
+        Expert Doctor Consultation
+        <span class="popup__title-accent">worth &#8377;2,999 &mdash; today &#8377;999</span>
+      </h2>
+
+      <div class="popup__price">
+        <span class="popup__price-was">&#8377;2,999</span>
+        <span class="popup__price-now">&#8377;999</span>
+        <span class="popup__price-badge">67% OFF</span>
+      </div>
+
+      <ul class="popup__list">
+        <li><i data-lucide="check"></i> One-to-one consultation with an MD physician</li>
+        <li><i data-lucide="check"></i> GLP-1 eligibility &amp; contraindication screening</li>
+        <li><i data-lucide="check"></i> Personalised Indian diet plan</li>
+        <li><i data-lucide="check"></i> Digitally signed prescription &amp; treatment plan</li>
+        <li><i data-lucide="check"></i> Consultation continues on WhatsApp &mdash; instantly</li>
+      </ul>
+
+      <div class="popup__timer" id="offerTimer">
+        <i data-lucide="clock"></i>
+        <span>Offer price held for <strong id="offerCountdown">10:00</strong></span>
+      </div>
+
+      <button type="button" class="btn btn--primary btn--lg btn--block popup__cta" data-open-consult="popup">
+        Book My &#8377;999 Consultation
+      </button>
+
+      <button type="button" class="popup__dismiss" id="offerPopupDismiss">Maybe later</button>
+
+      <p class="popup__note">Secured by Razorpay. Consultation fees are non-refundable.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DOCTOR CONSULTATION BOOKING FLOW
+     ============================================================ -->
+<div class="consult-overlay" id="consultOverlay" role="dialog" aria-modal="true" aria-labelledby="consultTitle" hidden>
+  <div class="consult">
+    <button type="button" class="consult__close" id="consultClose" aria-label="Close">&times;</button>
+
+    <ol class="consult__steps">
+      <li class="consult__stepdot is-active" data-dot="1"><span>1</span> Offer</li>
+      <li class="consult__stepdot" data-dot="2"><span>2</span> Details</li>
+      <li class="consult__stepdot" data-dot="3"><span>3</span> WhatsApp</li>
+    </ol>
+
+    <!-- ---------- STAGE 1: offer + pay ---------- -->
+    <section class="consult__stage is-active" data-stage="1">
+      <div class="consult__header">
+        <div class="consult__avatar" aria-hidden="true">AV</div>
+        <div>
+          <h2 class="consult__title" id="consultTitle">Expert Doctor Consultation</h2>
+          <p class="consult__subtitle">Dr. Akhileshwar Reddy Vangala &middot; MBBS, MD (Community and Family Medicine)</p>
+        </div>
+      </div>
+
+      <div class="consult__pricebox">
+        <div class="consult__pricerow">
+          <span>Consultation value</span>
+          <span class="consult__strike">&#8377;2,999</span>
+        </div>
+        <div class="consult__pricerow">
+          <span>Launch discount (67%)</span>
+          <span class="consult__discount">&minus; &#8377;2,000</span>
+        </div>
+        <div class="consult__pricerow consult__pricerow--total">
+          <span>You pay today</span>
+          <span>&#8377;999</span>
+        </div>
+      </div>
+
+      <ul class="consult__includes">
+        <li><i data-lucide="stethoscope"></i> One-to-one doctor consultation</li>
+        <li><i data-lucide="shield-check"></i> GLP-1 eligibility screening</li>
+        <li><i data-lucide="salad"></i> Personalised Indian diet plan</li>
+        <li><i data-lucide="file-text"></i> Digitally signed prescription</li>
+      </ul>
+
+      <label class="consult__consent">
+        <input type="checkbox" id="consultConsent">
+        <span>I consent to a teleconsultation under the NMC Telemedicine Guidelines and accept the strict no-refund policy.</span>
+      </label>
+
+      <button type="button" class="btn btn--primary btn--lg btn--block" id="consultPayBtn">
+        <i data-lucide="credit-card"></i> Pay &#8377;999 &amp; Book Consultation
+      </button>
+
+      <p class="consult__secure"><i data-lucide="lock"></i> Secured by Razorpay &middot; UPI, Cards, NetBanking</p>
+      <p class="consult__stats" data-consult-stats hidden></p>
+      <p class="consult-status" id="consultStatus" role="status" aria-live="polite" hidden></p>
+    </section>
+
+    <!-- ---------- STAGE 2: contact details (post-payment) ---------- -->
+    <section class="consult__stage" data-stage="2">
+      <div class="consult__paid">
+        <i data-lucide="check-circle"></i>
+        <div>
+          <strong>Payment received &mdash; &#8377;999</strong>
+          <span id="consultPaidRef">Signature verified</span>
+        </div>
+      </div>
+
+      <h2 class="consult__title consult__title--sm">Your contact details</h2>
+      <p class="consult__subtitle">Two numbers, so the doctor can always reach you for your consultation.</p>
+
+      <form id="consultForm" novalidate>
+        <div class="consult__grid">
+          <div class="form-group consult__span2">
+            <label class="form-label" for="cName">Full name <span class="req">*</span></label>
+            <input class="form-input" id="cName" name="name" type="text" autocomplete="name" placeholder="As per your ID" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cPhone">WhatsApp number <span class="req">*</span></label>
+            <div class="phone-field">
+              <span class="phone-field__cc">+91</span>
+              <input class="form-input" id="cPhone" name="phone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cAltPhone">Alternate number <span class="req">*</span></label>
+            <div class="phone-field">
+              <span class="phone-field__cc">+91</span>
+              <input class="form-input" id="cAltPhone" name="alt_phone" type="tel" inputmode="numeric" maxlength="10" placeholder="Family / backup number" required>
+            </div>
+            <p class="form-hint">Must differ from your WhatsApp number.</p>
+          </div>
+
+          <div class="form-group consult__span2">
+            <label class="form-label" for="cEmail">Email</label>
+            <input class="form-input" id="cEmail" name="email" type="email" autocomplete="email" placeholder="For your prescription copy">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cAge">Age</label>
+            <input class="form-input" id="cAge" name="age" type="number" min="18" max="99" placeholder="Years">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cSex">Sex</label>
+            <select class="form-input" id="cSex" name="sex">
+              <option value="">Select</option>
+              <option>Female</option>
+              <option>Male</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cCity">City</label>
+            <input class="form-input" id="cCity" name="city" type="text" placeholder="e.g. Hyderabad">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cLanguage">Preferred language</label>
+            <select class="form-input" id="cLanguage" name="language">
+              <option>English</option>
+              <option>Hindi</option>
+              <option>Telugu</option>
+              <option>Tamil</option>
+              <option>Kannada</option>
+              <option>Malayalam</option>
+              <option>Marathi</option>
+              <option>Bengali</option>
+              <option>Gujarati</option>
+            </select>
+          </div>
+
+          <div class="form-group consult__span2">
+            <label class="form-label" for="cSlot">Preferred consultation time</label>
+            <select class="form-input" id="cSlot" name="preferred_slot">
+              <option>Any time (earliest available)</option>
+              <option>Morning (9 AM &ndash; 12 PM)</option>
+              <option>Afternoon (12 PM &ndash; 4 PM)</option>
+              <option>Evening (4 PM &ndash; 8 PM)</option>
+              <option>Night (8 PM &ndash; 10 PM)</option>
+            </select>
+          </div>
+
+          <div class="form-group consult__span2">
+            <label class="form-label" for="cConcern">What would you like to discuss?</label>
+            <textarea class="form-input" id="cConcern" name="concern" rows="3" maxlength="600" placeholder="Current weight, previous attempts, medical conditions, medications, questions about GLP-1&hellip;"></textarea>
+          </div>
+
+          <div class="form-group consult__span2">
+            <label class="form-label" for="cReferral">Referral code (optional)</label>
+            <input class="form-input" id="cReferral" name="referral_code" type="text" maxlength="24" placeholder="If a friend referred you">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg btn--block" id="consultSubmitBtn">
+          Confirm Booking &amp; Open WhatsApp
+        </button>
+        <p class="consult-status" id="consultFormStatus" role="status" aria-live="polite" hidden></p>
+      </form>
+    </section>
+
+    <!-- ---------- STAGE 3: success + WhatsApp hand-off ---------- -->
+    <section class="consult__stage consult__stage--success" data-stage="3">
+      <div class="consult__tick" aria-hidden="true">
+        <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="none"/><path fill="none" d="M15 27l7.5 7.5L37.5 19"/></svg>
+      </div>
+
+      <h2 class="consult__title">Consultation booked successfully</h2>
+      <p class="consult__subtitle">
+        Your slot with Dr. Akhileshwar Reddy Vangala is reserved. Continue on WhatsApp to confirm your timing.
+      </p>
+
+      <div class="consult__bookingid">
+        <span>Booking ID</span>
+        <strong id="consultBookingId">&mdash;</strong>
+      </div>
+
+      <a href="#" id="consultWhatsAppBtn" class="btn btn--whatsapp btn--lg btn--block" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Open WhatsApp Chat
+      </a>
+
+      <p class="consult__redirect" id="consultRedirectNote">Opening WhatsApp automatically&hellip;</p>
+
+      <div class="consult__refer">
+        <p class="consult__refer-title">Refer a friend &mdash; both of you save</p>
+        <p class="consult__refer-desc">Share your code. Your friend gets the &#8377;999 price, and you get &#8377;500 off your program fee.</p>
+        <div class="consult__refer-code">
+          <code id="consultReferCode">&mdash;</code>
+          <button type="button" class="btn btn--outline" id="consultCopyCode">Copy</button>
+        </div>
+        <a href="#" id="consultShareBtn" class="btn btn--whatsapp btn--block" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+      </div>
+    </section>
+  </div>
+</div>
+
 <!-- Admin Panel (hash-based route) -->
 <div class="admin-overlay" id="adminOverlay" style="display:none">
   <div class="admin-panel">
@@ -1126,5 +1414,6 @@
 </div>
 
 <script src="./app.js" defer></script>
+<script src="./consult.js" defer></script>
 </body>
 </html>
