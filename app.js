@@ -676,7 +676,18 @@
     let body = {};
     try { body = await res.json(); } catch (_) { /* non-JSON response */ }
     if (!res.ok || body.success === false) {
-      throw new Error(body.error || 'Request failed (HTTP ' + res.status + ').');
+      if (body.error) throw new Error(body.error);
+      // A bare status code tells the patient nothing, so explain the two failures
+      // they can actually hit: the API not being deployed, or its keys missing.
+      if (res.status === 404) {
+        throw new Error('Payments are not available on this site yet. The ' + path +
+          ' endpoint returned 404, which means the API is not deployed on this host.');
+      }
+      if (res.status >= 500) {
+        throw new Error('The payment service is not responding. Please try again in a ' +
+          'moment, or contact us on WhatsApp and we will book you in manually.');
+      }
+      throw new Error('Could not reach the payment service (HTTP ' + res.status + ').');
     }
     return body;
   }

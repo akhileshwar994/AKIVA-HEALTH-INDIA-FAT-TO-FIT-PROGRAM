@@ -1,0 +1,54 @@
+# Netlify configuration for indiafattofit.com
+#
+# The site itself is static (index.html / style.css / app.js / consult.js) and is
+# published straight from the repository root. The payment and booking endpoints
+# run as Netlify Functions, which is what makes /api/* work in production — a
+# plain static deploy returns 404 for them and no payment can start.
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+  # No build command: the site is hand-written HTML/CSS/JS. Netlify installs the
+  # dependencies in package.json automatically, so the functions get `razorpay`
+  # and `dotenv` without a build step.
+
+[functions]
+  node_bundler = "esbuild"
+
+# Keep the public URLs as /api/* so the same frontend works on Netlify, Vercel and
+# the local Express server without any per-host configuration.
+[[redirects]]
+  from = "/api/create-order"
+  to = "/.netlify/functions/create-order"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/verify-payment"
+  to = "/.netlify/functions/verify-payment"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/config"
+  to = "/.netlify/functions/config"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/consultation-booking"
+  to = "/.netlify/functions/consultation-booking"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/stats"
+  to = "/.netlify/functions/stats"
+  status = 200
+  force = true
+
+# Never publish server-side files or secrets to the CDN.
+[[headers]]
+  for = "/.env*"
+  [headers.values]
+    X-Robots-Tag = "noindex"

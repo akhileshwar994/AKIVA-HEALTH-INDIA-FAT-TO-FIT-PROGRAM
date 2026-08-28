@@ -83,6 +83,9 @@ link should point at.
 | `consult.js` | The ₹999 consultation funnel: announcement bar, offer popup, nav button, 3-stage modal, referral share |
 | `server.js` | Express dev/self-host server: mounts the API + serves the static site |
 | `vercel.json` | Routes the five functions on Vercel |
+| `netlify.toml` | Publishes the site and redirects `/api/*` to Netlify Functions |
+| `netlify/functions/_adapter.js` | Runs the `api/` handlers as Netlify Functions (no duplicated logic) |
+| `netlify/functions/*.js` | One three-line wrapper per endpoint |
 | `.env` | Your real keys — **git-ignored, never commit** |
 | `.env.example` | Template to copy |
 
@@ -171,16 +174,37 @@ vercel --prod
 
 Then point `indiafattofit.com` at the Vercel deployment.
 
-### Netlify
+### Netlify (this is how indiafattofit.com is hosted)
 
-Move the three files to `netlify/functions/` and add to `netlify.toml`:
+Already wired up: `netlify.toml` publishes the site from the repo root, points
+`functions` at `netlify/functions/`, and redirects every `/api/*` path to the matching
+function. `netlify/functions/_adapter.js` runs the same handlers from `api/`, so there
+is one implementation per endpoint shared by Netlify, Vercel and the local server.
 
-```toml
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
+**You must set the environment variables in the Netlify dashboard.** Netlify never reads
+your local `.env`. Go to *Site configuration → Environment variables* and add:
+
+| Key | Value |
+| --- | --- |
+| `RAZORPAY_KEY_ID` | `rzp_test_*` while testing, `rzp_live_*` in production |
+| `RAZORPAY_KEY_SECRET` | from the Razorpay dashboard |
+| `ALLOWED_ORIGIN` | `https://indiafattofit.com` |
+| `DOCTOR_WHATSAPP` | `917801009912` |
+
+Then trigger a redeploy — environment variables only apply to builds that run after
+they are saved. Confirm it worked:
+
+```bash
+curl https://indiafattofit.com/api/config
+# {"success":true,"key_id":"rzp_...","currency":"INR"}
 ```
+
+If that returns **404**, the functions did not deploy (check the deploy log for
+`netlify/functions`). If it returns **500**, the keys are missing from the dashboard.
+
+Note that Netlify's filesystem is read-only, so `data/bookings.jsonl` will not persist
+there — bookings return `persisted: false` and the WhatsApp message is the record. See
+"The ₹999 consultation funnel" above.
 
 ### Any Node host (Render, Railway, VPS)
 
